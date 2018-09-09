@@ -16,54 +16,35 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 
 @Component
-public class ClientBase extends ClientBasic implements RestClient{
+public class ClientBase extends ClientBasic implements RestClient {
 
-    @Autowired
-    private RestTemplate restTemplate;
+	@Autowired
+	private RestTemplate restTemplate;
 
-    /**
-     * @param url
-     * @param method
-     * @param requestEntity
-     * @param responseType
-     * @param errorCode
-     * @param <T>
-     * @return
-     */
-    public <T> ResponseEntity<T> getResponse(String url, HttpMethod method,
-                                             HttpEntity<?> requestEntity, Class<T> responseType, ErrorCode errorCode) {
-        ResponseEntity<T> responseEntity = restTemplateResponse(url, method, requestEntity, responseType);
-        if (HttpStatus.SERVICE_UNAVAILABLE == responseEntity.getStatusCode()){
-            throw new ServiceException(errorCode);
-        }
-        return responseEntity;
-    }
+	/**
+	 * @param url
+	 * @param method
+	 * @param requestEntity
+	 * @param responseType
+	 * @param errorCode
+	 * @param <T>
+	 * @return
+	 */
+	public <T> ResponseEntity<T> getResponse(String url, HttpMethod method, HttpEntity<?> requestEntity,
+			Class<T> responseType, ErrorCode errorCode) {
+		ResponseEntity<T> responseEntity = restTemplateResponse(url, method, requestEntity, responseType);
+		if (HttpStatus.SERVICE_UNAVAILABLE == responseEntity.getStatusCode()) {
+			throw new ServiceException(errorCode);
+		}
+		return responseEntity;
+	}
 
-    /**
-     * Deprecated. Use the method sending the error code.
-     * @param url
-     * @param method
-     * @param requestEntity
-     * @param responseType
-     * @param <T>
-     * @return
-     */
-    @Deprecated
-    public <T> ResponseEntity<T> getResponse(String url, HttpMethod method,
-                                              HttpEntity<?> requestEntity, Class<T> responseType) {
-        ResponseEntity<T> responseEntity = restTemplateResponse(url, method, requestEntity, responseType);
-        if (HttpStatus.SERVICE_UNAVAILABLE == responseEntity.getStatusCode()){
-            throw new ServiceException(CommonResponseCode.ERROR_000001);
-        }
-        return responseEntity;
-    }
-
-    @HystrixCommand(fallbackMethod = "fallback", commandProperties = {
-            @HystrixProperty(name = "execution.timeout.enabled", value = "false")},
-            ignoreExceptions = {HttpStatusCodeException.class})
-    public <T> ResponseEntity<T> restTemplateResponse(String url, HttpMethod method,
-                                             HttpEntity<?> requestEntity, Class<T> responseType) {
-        return restTemplate.exchange(url, method, requestEntity, responseType);
-    }
+	@HystrixCommand(fallbackMethod = "fallback", commandProperties = {
+			@HystrixProperty(name = "execution.timeout.enabled", value = "false") }, ignoreExceptions = {
+					HttpStatusCodeException.class })
+	public <T> ResponseEntity<T> restTemplateResponse(String url, HttpMethod method, HttpEntity<?> requestEntity,
+			Class<T> responseType) {
+		return restTemplate.exchange(url, method, requestEntity, responseType);
+	}
 
 }
